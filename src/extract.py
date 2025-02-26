@@ -28,7 +28,35 @@ def get_public_holidays(public_holidays_url: str, year: str) -> DataFrame:
     # Debes lanzar SystemExit si la solicitud falla. Investiga el método raise_for_status
     # de la biblioteca requests.
 
-    raise NotImplementedError
+    #construir la url completa para los dias festivos
+    url = f"{public_holidays_url}/{year}/BR"
+
+    try:
+        #Realizar la peticion HTTP GET
+        response = requests.get(url)
+        
+        #Verificar si al peticion fue exitosa
+        response.raise_for_status()
+
+        #convertir la respuesta JSON a un dataframe
+        holidays_df = read_json(response.text)
+
+        #Eliminar la scolumnas types y counties
+        holidays_df = holidays_df.drop(columns=["types", "counties"], errors = "ignore")
+
+        #convertir la columna data a datetime
+        holidays_df["date"] = to_datetime(holidays_df["date"])
+
+        return holidays_df
+    except requests.exceptions.RequestException as e:
+
+        #Si ocurre algun error con la solicitud finaliza el programa
+        print(f"Error al obtener los dias festivos: {e}")
+
+
+
+
+        raise NotImplementedError
 
 
 def extract(
